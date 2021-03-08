@@ -1,0 +1,22 @@
+{
+  "name": "t7-salon-web-app-backend",
+  "version": "1.0.0",
+  "description": "The documentation and tracking for the project's backend stuff",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PRJ666-Team7/T7-Salon-Web-App-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PRJ666-Team7/T7-Salon-Web-App-backend/issues"
+  },
+  "homepage": "https://github.com/PRJ666-Team7/T7-Salon-Web-App-backend#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
