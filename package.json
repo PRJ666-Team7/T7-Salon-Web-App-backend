@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/PRJ666-Team7/T7-Salon-Web-App-backend#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.1",
+    "sequelize": "^6.5.1"
   }
 }
