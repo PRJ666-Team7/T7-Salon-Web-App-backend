@@ -1,9 +1,7 @@
 const { Pool, Client } = require('pg')
 
-const connectionString = 'postgres://vzkverhazpkutr:e025b418dceb93238d7481b152d92ec94d76a63e9313b933ef79489d517adb26@ec2-3-211-37-117.compute-1.amazonaws.com:5432/d49u410ndpdbno'
-
 const client = new Client({
-  connectionString: "postgres://vzkverhazpkutr:e025b418dceb93238d7481b152d92ec94d76a63e9313b933ef79489d517adb26@ec2-3-211-37-117.compute-1.amazonaws.com:5432/d49u410ndpdbno",
+  connectionString: process.env.CONNECT_STRING,
   ssl: {
     rejectUnauthorized: false
   }
@@ -11,16 +9,46 @@ const client = new Client({
 
 client.connect()
 
-module.exports.getUsers = async () => {
+module.exports.getUser = async (email) => {
     try {
         const query = {
-            text: 'SELECT * from users',
-            // values: ['brianc', 'brian.m.carlson@gmail.com'],
+            text: 'SELECT * from users where usr_email = $1',
+            values: [email]
+        }
+        const res = await client.query(query)
+
+        return res.rows[0]
+    } catch (err) {
+        console.log(err.stack)
+    }
+}
+
+
+module.exports.getEmployee = async (id) => {
+    try {
+        const query = {
+            text: 'SELECT * from employee where usr_id = $1',
+            values: [id]
         }
 
         const res = await client.query(query)
 
-        return res.rows
+        return res.rows[0]
+    } catch (err) {
+        console.log(err.stack)
+    }
+}
+
+
+module.exports.addUser = async (email, fname, lname, phone, password) => {
+    try {
+        const query = {
+            text: 'INSERT INTO users( usr_email, usr_fname, usr_lname, usr_phone, usr_password) VALUES($1, $2, $3, $4, $5) RETURNING *',
+            values: [email, fname, lname, phone, password],
+        }
+        const res = await client.query(query)
+
+        return res.rows[0]
     } catch (err) {
         console.log(err.stack)
     }
