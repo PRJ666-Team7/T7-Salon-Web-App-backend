@@ -122,7 +122,7 @@ module.exports = function (app) {
           
           const mailOptions = {
             from: `${process.env.EMAIL_ADDRESS}`,
-            to: 'mui.foun@gmail.com',
+            to: `${req.body.email}`,
             subject: "Password reset link",
             text:
               `Hi ${userData.usr_fname},\n\n` +
