@@ -2,7 +2,8 @@ const dataService = require('../dataService/dataService')
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const passport = require('passport');
+const nodemailer = require("nodemailer");
+var moment = require('moment'); 
 
 module.exports = function (app) {
   app.post('/login', body('email').isLength({min: 5, max: 50}), body('password').isLength({min: 1, max: 30}), async (req, res) => {
@@ -22,6 +23,11 @@ module.exports = function (app) {
         }
 
         const result = await bcrypt.compare(req.body.password, userData.usr_password)
+
+        if (!result) {
+          throw "Wrong password"
+        }
+
         const token = await getJwt(userData.usr_email, userData.usr_fname, userData.usr_lname, userData.usr_phone, userData.usr_id, userData.isadmin, isEmployee)
 
         return res.json({
@@ -78,6 +84,94 @@ module.exports = function (app) {
           });
         }
       } catch (error) {
+        return res.json({status: "fail"})
+      }
+  });
+
+  app.post('/passwordRecovery', 
+    body('email').isLength({min: 5, max: 50}), 
+    async (req, res) => {
+      try {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+          throw "validation error"
+        } else {
+          const userData = await dataService.getUser(req.body.email)
+
+          if (!userData) {
+            throw "no email"
+          }
+
+          const token = await bcrypt.hash(userData.usr_password + moment.unix(Number), 10)
+          const updateResult = await dataService.updateUserResetHash(token, req.body.email)
+
+          if (!updateResult){
+            throw "database error"
+          }
+
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: `${process.env.EMAIL_ADDRESS}`,
+              pass: `${process.env.EMAIL_PASSWORD}`,
+            },
+            debug: true, // show debug output
+            logger: true // log information in console
+          });
+          
+          const mailOptions = {
+            from: `${process.env.EMAIL_ADDRESS}`,
+            to: 'mui.foun@gmail.com',
+            subject: "Password reset link",
+            text:
+              `Hi ${userData.usr_fname},\n\n` +
+              "Please click the below link to reset your password.\n\n" + 
+              `http://localhost:3000/passwordReset?passwordHash=${token}`
+          };
+          
+          transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              return res.json({status: "fail"})
+            } else {
+              console.log("Mail sent");
+              return res.json({status: "success"});
+            }
+          });
+        }
+      } catch (error) {
+        console.log("error: ", error)
+        return res.json({status: "fail"})
+      }
+  });
+
+  app.post('/passwordReset', 
+    body('password').isLength({min: 1, max: 30}),
+    body('passwordHash').isLength({min: 1}),
+    async (req, res) => {
+      try {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+          throw "validation error"
+        } else {
+          const userData = await dataService.getUserByResetHash(req.body.passwordHash)
+
+          if (!userData) {
+            throw "no user"
+          }
+
+          const hashPassword = await bcrypt.hash(req.body.password, 15)
+          const updateResult = await dataService.updateUserPassword(hashPassword, req.body.passwordHash)
+
+          if (updateResult) {
+            return res.json({status: "success"});
+          } else {
+            throw "fail to update password"
+          }
+        }
+      } catch (error) {
+        console.log("error: ", error)
         return res.json({status: "fail"})
       }
   });

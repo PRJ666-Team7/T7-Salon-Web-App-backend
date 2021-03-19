@@ -23,6 +23,19 @@ module.exports.getUser = async (email) => {
     }
 }
 
+module.exports.getUserByResetHash = async (hash) => {
+    try {
+        const query = {
+            text: 'SELECT * from users where usr_reset_hash = $1',
+            values: [hash]
+        }
+        const res = await client.query(query)
+
+        return res.rows[0]
+    } catch (err) {
+        console.log(err.stack)
+    }
+}
 
 module.exports.getEmployee = async (id) => {
     try {
@@ -39,7 +52,6 @@ module.exports.getEmployee = async (id) => {
     }
 }
 
-
 module.exports.addUser = async (email, fname, lname, phone, password) => {
     try {
         const query = {
@@ -51,5 +63,36 @@ module.exports.addUser = async (email, fname, lname, phone, password) => {
         return res.rows[0]
     } catch (err) {
         console.log(err.stack)
+    }
+}
+
+module.exports.updateUserResetHash = async (hash, email) => {
+    try {
+        const query = {
+            text: 'UPDATE users SET usr_reset_hash = $1 where usr_email = $2',
+            values: [hash, email]
+        }
+
+        const res = await client.query(query)
+
+        return res.rowCount == 1
+    } catch (err) {
+        console.log(err.stack)
+    }
+}
+
+module.exports.updateUserPassword = async (password, hash) => {
+    try {
+        console.log("pass and has:", password, hash)
+        const query = {
+            text: 'UPDATE users SET usr_reset_hash = null, usr_password = $1 where usr_reset_hash = $2',
+            values: [password, hash]
+        }
+
+        const res = await client.query(query)
+
+        return res.rowCount == 1
+    } catch (err) {
+        console.log("updateUserPassword error: ", err.stack)
     }
 }
