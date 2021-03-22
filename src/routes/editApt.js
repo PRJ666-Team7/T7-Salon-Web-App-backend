@@ -1,16 +1,31 @@
 const appointments = require("../appointments/appointments");
 const serviceLine = require("../appointments/serviceLine");
-
+const passport = require("passport");
 const { body, validationResult } = require("express-validator");
 
 module.exports = function (app) {
-  app.get("/getApt", async (req, res) => {
-    const aptData = await appointments.getAppointments();
+  app.get("/getApt", passport.authenticate('jwt', { session: false }), async (req, res) => {
+
+    console.log(req.user)
+    if(!req.user.isEmployee ){
+      return res.json({
+        status: "fail"
+      })
+    }
+    //console.log(req.user)
+    const aptData = await appointments.getAppointments(req.user.usr_id);
 
     res.send(aptData);
   });
 
-  app.get("/getSrvLine", async (req, res) => {
+  app.get("/getSrvLine", passport.authenticate('jwt', { session: false }), async (req, res) => {
+
+    if(!req.user.isEmployee){
+      return res.json({
+        status: "fail"
+      })
+    }
+
     const srvData = await serviceLine.getServiceLine(req.query.id);
 
     res.send(srvData);
@@ -19,7 +34,14 @@ module.exports = function (app) {
   app.post(
     "/removeApt",
     body("id").isLength({ min: 1, max: 5 }),
+    passport.authenticate('jwt', { session: false }),
     async (req, res) => {
+      
+      if(!req.user.isEmployee){
+        return res.json({
+          status: "fail"
+        })
+      }
       try {
         const errors = validationResult(req);
 
@@ -44,8 +66,15 @@ module.exports = function (app) {
     body("id").isLength({ min: 1, max: 5 }),
     body("date").isLength({ min: 10, max: 10 }),
     body("time").isLength({ min: 4, max: 8 }),
-    body("services").isArray({ min: 0, max: 10 }),
+    body("services").isArray({ min: 1, max: 10 }),
+    passport.authenticate('jwt', { session: false }),
     async (req, res) => {
+      
+      if(!req.user.isEmployee){
+        return res.json({
+          status: "fail"
+        })
+      }
       try {
         const errors = validationResult(req);
 
