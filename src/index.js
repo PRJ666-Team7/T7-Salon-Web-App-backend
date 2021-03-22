@@ -20,6 +20,8 @@ app.use(function (req, res, next) {
 });
 
 var auth = require('./routes/auth')(app);
+var editApt = require('./routes/editApt')(app);
+var editSrv = require('./routes/editSrv')(app);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)
