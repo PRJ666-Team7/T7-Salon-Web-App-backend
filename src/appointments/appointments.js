@@ -10,14 +10,14 @@ const client = new Client({
 
 client.connect();
 
-module.exports.getAppointments = async () => {
+module.exports.getAppointments = async (id) => {
   try {
-    sqlLine = `SELECT APPOINTMENT.APT_ID AS "id", CONCAT(USERS.USR_FNAME, ' ', USERS.USR_LNAME) AS "name", USERS.USR_PHONE AS "phone", CONCAT(APPOINTMENT.APT_DATE, ' ', APPOINTMENT.APT_TIME) AS "time" FROM APPOINTMENT INNER JOIN USERS ON APPOINTMENT.USR_ID = USERS.USR_ID ORDER BY APPOINTMENT.APT_DATE, APT_TIME`;
+    sqlLine = `SELECT APPOINTMENT.APT_ID AS "id", CONCAT(USERS.USR_FNAME, ' ', USERS.USR_LNAME) AS "name", USERS.USR_PHONE AS "phone", CONCAT(APPOINTMENT.APT_DATE, ' ', APPOINTMENT.APT_TIME) AS "time" FROM APPOINTMENT INNER JOIN USERS ON APPOINTMENT.USR_ID = USERS.USR_ID WHERE APPOINTMENT.emp_id = (select emp_id from employee where usr_id = ` + id + `) ORDER BY APPOINTMENT.APT_DATE, APT_TIME`;
 
     const query = {
       text: sqlLine,
     };
-    
+
     const res = await client.query(query);
 
     return Promise.all(
