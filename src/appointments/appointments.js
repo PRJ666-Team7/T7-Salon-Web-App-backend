@@ -1,0 +1,80 @@
+const { Client } = require("pg");
+const services = require("../appointments/serviceLine");
+
+const client = new Client({
+  connectionString: process.env.CONNECT_STRING,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+client.connect();
+
+module.exports.getAppointments = async () => {
+  try {
+    sqlLine = `SELECT APPOINTMENT.APT_ID AS "id", CONCAT(USERS.USR_FNAME, ' ', USERS.USR_LNAME) AS "name", USERS.USR_PHONE AS "phone", CONCAT(APPOINTMENT.APT_DATE, ' ', APPOINTMENT.APT_TIME) AS "time" FROM APPOINTMENT INNER JOIN USERS ON APPOINTMENT.USR_ID = USERS.USR_ID ORDER BY APPOINTMENT.APT_DATE, APT_TIME`;
+
+    const query = {
+      text: sqlLine,
+    };
+    
+    const res = await client.query(query);
+
+    return Promise.all(
+      res.rows.map(async (line) => {
+        return {
+          id: line.id,
+          name: line.name,
+          phone: line.phone,
+          service: await services.getServiceLineById(line.id),
+          time: line.time,
+        };
+      })
+    );
+  } catch (err) {
+    console.log(err.stack);
+  }
+};
+
+module.exports.removeAppointments = async (id) => {
+  try {
+    sqlLine = `DELETE FROM APPOINTMENT WHERE APT_ID = ` + id;
+
+    const query = {
+      text: sqlLine,
+    };
+
+    const res = await client.query(query);
+
+    return res;
+  } catch (err) {
+    console.log(err.stack);
+  }
+};
+
+module.exports.editAppointments = async (data) => {
+  if (data) {
+    try {
+      sqlLine =
+        `UPDATE APPOINTMENT SET APT_DATE = '` +
+        data.date +
+        `', APT_TIME = '` +
+        data.time +
+        `' WHERE APT_ID =` +
+        data.id;
+
+      const query = {
+        text: sqlLine,
+      };
+
+      const res = await client.query(query);
+
+      return res;
+    } catch (err) {
+      console.log(err.stack);
+    }
+  }
+  else{
+    return null;
+  }
+};
