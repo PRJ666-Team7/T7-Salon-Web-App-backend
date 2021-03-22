@@ -4,9 +4,7 @@ const appointments = require("../appointments/appointments");
 const employees = require("../employees/employees");
 const passport = require("passport");
 const services = require("../services/services");
-const passport = require("passport");
 const nodemailer = require("nodemailer");
-
 
 const { body, validationResult } = require("express-validator");
 
