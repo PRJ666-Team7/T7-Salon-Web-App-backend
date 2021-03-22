@@ -13,7 +13,7 @@ passport.use(
     'jwt',
     new JwtStrategy(jwtOptions, (jwt_payload, next) => {
       try {
-        console.log("jwt", jwt_payload)
+        //console.log("jwt", jwt_payload)
         if (jwt_payload) {
           next(null, { 
             usr_id: jwt_payload.usr_id,
@@ -21,7 +21,8 @@ passport.use(
             fname: jwt_payload.fname,
             lname: jwt_payload.lname,
             phone: jwt_payload.phone,
-            isAdmin: jwt_payload.isAdmin
+            isAdmin: jwt_payload.isAdmin,
+            isEmployee: jwt_payload.isEmployee,
           })
         } else {
           done(null, false, {message: 'no_user'});
