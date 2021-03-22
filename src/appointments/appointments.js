@@ -107,3 +107,33 @@ module.exports.addAppointments = async (data, usrId) => {
     return null;
   }
 };
+
+module.exports.addAppointments = async (data, usrId) => {
+  if (data) {
+    try {
+      sqlLine =
+        `INSERT INTO APPOINTMENT (EMP_ID, APT_DATE, APT_TIME, USR_ID) VALUES (` +
+        data.empId +
+        `, '` +
+        data.date +
+        `', '` +
+        data.time +
+        `', ` +
+        usrId +
+        `) RETURNING APT_ID`;
+
+      const query = {
+        text: sqlLine,
+      };
+
+      const res = await client.query(query);
+
+      return res.rows[0].apt_id;
+
+    } catch (err) {
+      console.log(err.stack);
+    }
+  } else {
+    return null;
+  }
+};
