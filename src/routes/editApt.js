@@ -100,4 +100,11 @@ module.exports = function (app) {
       }
     }
   );
+
+  app.get("/getUsrApt", passport.authenticate('jwt', { session: false }), async (req, res) => {
+
+    const appointmentData = await appointments.getUserAppointments(req.user.usr_id);
+
+    res.send(appointmentData);
+  });
 };

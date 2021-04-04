@@ -1,5 +1,6 @@
 const { Client } = require("pg");
 const services = require("../appointments/serviceLine");
+const employees = require("../employees/employees");
 
 const client = new Client({
   connectionString: process.env.CONNECT_STRING,
@@ -135,5 +136,33 @@ module.exports.addAppointments = async (data, usrId) => {
     }
   } else {
     return null;
+  }
+};
+
+module.exports.getUserAppointments = async (id) => {
+  try {
+    sqlLine = `SELECT APT_ID AS "id", EMP_ID AS "empId", APT_DATE AS "date", APT_TIME_START AS "startTime", APT_TIME_END AS "endTime" FROM APPOINTMENT WHERE USR_ID = ` + id + ` ORDER BY APT_DATE, APT_TIME_START`;
+
+    const query = {
+      text: sqlLine,
+    };
+
+    const res = await client.query(query);
+
+    let money = 0;
+    return Promise.all(
+      res.rows.map(async (line) => {
+        return {
+          id: line.id,
+          name: await employees.getEmployeeName(line.empId),
+          service: await services.getServiceLine(line.id),
+          date: line.date,
+          startTime: line.startTime,
+          endTime: line.endTime,
+        };
+      })
+    );
+  } catch (err) {
+    console.log(err.stack);
   }
 };

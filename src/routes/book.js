@@ -14,7 +14,7 @@ module.exports = function (app) {
     const employeesData = await employees.getEmployee();
     const servicesData = await services.getServices();
 
-    console.log("dfj", employeesData, servicesData)
+    //console.log("dfj", employeesData, servicesData)
     res.json({status: "success", employeesData, servicesData });
   });
 
@@ -60,7 +60,7 @@ module.exports = function (app) {
         }
       });
 
-      res.send(addSrvLine);
+      //res.send(addSrvLine);
     });
 };
 
