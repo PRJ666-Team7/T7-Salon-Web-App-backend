@@ -140,7 +140,6 @@ module.exports.addAppointments = async (data, usrId) => {
 
 module.exports.adminAddAppointment = async (emp, date, startTime, endTime) => {
   try {
-    console.log("emp, date, startTime, endTime", emp, date, startTime, endTime)
       const query = {
           text: 'INSERT INTO appointment( emp_id, apt_date, apt_time_start, apt_time_end) VALUES($1, $2, $3, $4) RETURNING *',
           values: [emp, date, startTime, endTime],
@@ -157,6 +156,20 @@ module.exports.getAppointmentsByEmployee = async (id, date) => {
   try {
       const query = {
           text: 'SELECT * from appointment where emp_id = $1 and apt_date= $2',
+          values: [id, date]
+      }
+      const res = await client.query(query)
+
+      return res.rows
+  } catch (err) {
+      console.log(err.stack)
+  }
+}
+
+module.exports.getEmployeeSchdule = async (id, date) => {
+  try {
+      const query = {
+          text: 'SELECT * from appointment where emp_id = $1 and apt_date >= $2',
           values: [id, date]
       }
       const res = await client.query(query)

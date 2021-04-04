@@ -14,12 +14,11 @@ module.exports = function async (app) {
         body("endTime").isLength({ min: 1 }),
         passport.authenticate('jwt', { session: false }),
         async (req, res) => {
-            console.log("req.body", req.body)
-            //   if(!req.user.isAdmin){
-            //     return res.json({
-            //       status: "fail"
-            //     })
-            //   }
+              if(!req.user.isAdmin){
+                return res.json({
+                  status: "fail"
+                })
+              }
             try {
                 const errors = validationResult(req);
 
@@ -37,14 +36,12 @@ module.exports = function async (app) {
                     await Promise.all(req.body.date.map(async (d) =>{
                         const result = await appointmentDataService.getAppointmentsByEmployee(req.body.employee, d)
 
-                        console.log("result", result)
                         const startTime = moment(req.body.startTime, 'hh:mm');
                         const endTime = moment(req.body.startTime, 'hh:mm');
                         endTime.add(30, "minutes")
 
                         const aptExist = result.find(a => a.apt_time_start == startTime.format("hh:mm:ss"))
                         if (aptExist == undefined){
-                            console.log("startTime", startTime)
                             const addAptResult = await appointmentDataService.adminAddAppointment(req.body.employee, d, startTime.format("hh:mm"), endTime.format("hh:mm"))
                         }
 
@@ -54,7 +51,6 @@ module.exports = function async (app) {
 
                             const aptExist = result.find(a => a.apt_time_start == startTime.format("hh:mm:ss"))
                             if (aptExist == undefined){
-                                console.log("startTime", startTime)
                                 const addAptResult = await appointmentDataService.adminAddAppointment(req.body.employee, d, startTime.format("hh:mm"), endTime.format("hh:mm"))
                             }
                         }
