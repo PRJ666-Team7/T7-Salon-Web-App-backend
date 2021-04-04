@@ -1,9 +1,9 @@
-const dataService = require('../dataService/dataService')
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const nodemailer = require("nodemailer");
 var moment = require('moment'); 
+const authDataService = require('../dataService/auth')
 
 module.exports = function (app) {
   app.post('/login', body('email').isLength({min: 5, max: 50}), body('password').isLength({min: 1, max: 30}), async (req, res) => {
@@ -12,10 +12,10 @@ module.exports = function (app) {
     if (!errors.isEmpty()) {
       return res.json({status: "fail", err: errors.msg + ": " + errors.param})
     } else {
-      const userData = await dataService.getUser(req.body.email)
+      const userData = await authDataService.getUser(req.body.email)
 
       if (userData) {
-        const employee = await dataService.getEmployee(userData.usr_id)
+        const employee = await authDataService.getEmployee(userData.usr_id)
 
         let isEmployee = false
         if (employee != undefined){
@@ -64,7 +64,7 @@ module.exports = function (app) {
           return res.json({status: "fail"})
         } else {
           const hashPassword = await bcrypt.hash(req.body.password, 15)
-          const userDataAdd = await dataService.addUser(req.body.email, req.body.fname, req.body.lname, req.body.phone, hashPassword)
+          const userDataAdd = await authDataService.addUser(req.body.email, req.body.fname, req.body.lname, req.body.phone, hashPassword)
 
           const token = await getJwt(req.body.email, req.body.fname, req.body.lname, req.body.phone, userDataAdd.usr_id, userDataAdd.isadmin, false)
 
@@ -97,14 +97,14 @@ module.exports = function (app) {
         if (!errors.isEmpty()) {
           throw "validation error"
         } else {
-          const userData = await dataService.getUser(req.body.email)
+          const userData = await authDataService.getUser(req.body.email)
 
           if (!userData) {
             throw "no email"
           }
 
           const token = await bcrypt.hash(userData.usr_password + moment.unix(Number), 10)
-          const updateResult = await dataService.updateUserResetHash(token, req.body.email)
+          const updateResult = await authDataService.updateUserResetHash(token, req.body.email)
 
           if (!updateResult){
             throw "database error"
@@ -155,14 +155,14 @@ module.exports = function (app) {
         if (!errors.isEmpty()) {
           throw "validation error"
         } else {
-          const userData = await dataService.getUserByResetHash(req.body.passwordHash)
+          const userData = await authDataService.getUserByResetHash(req.body.passwordHash)
 
           if (!userData) {
             throw "no user"
           }
 
           const hashPassword = await bcrypt.hash(req.body.password, 15)
-          const updateResult = await dataService.updateUserPassword(hashPassword, req.body.passwordHash)
+          const updateResult = await authDataService.updateUserPassword(hashPassword, req.body.passwordHash)
 
           if (updateResult) {
             return res.json({status: "success"});

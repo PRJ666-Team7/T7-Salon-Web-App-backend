@@ -83,7 +83,6 @@ module.exports.updateUserResetHash = async (hash, email) => {
 
 module.exports.updateUserPassword = async (password, hash) => {
     try {
-        console.log("pass and has:", password, hash)
         const query = {
             text: 'UPDATE users SET usr_reset_hash = null, usr_password = $1 where usr_reset_hash = $2',
             values: [password, hash]

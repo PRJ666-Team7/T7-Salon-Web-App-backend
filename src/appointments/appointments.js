@@ -139,30 +139,32 @@ module.exports.addAppointments = async (data, usrId) => {
   }
 };
 
-module.exports.getUserAppointments = async (id) => {
+module.exports.adminAddAppointment = async (emp, date, startTime, endTime) => {
   try {
-    sqlLine = `SELECT APT_ID AS "id", EMP_ID AS "empId", APT_DATE AS "date", APT_TIME_START AS "startTime", APT_TIME_END AS "endTime" FROM APPOINTMENT WHERE USR_ID = ` + id + ` ORDER BY APT_DATE, APT_TIME_START`;
+    console.log("emp, date, startTime, endTime", emp, date, startTime, endTime)
+      const query = {
+          text: 'INSERT INTO appointment( emp_id, apt_date, apt_time_start, apt_time_end) VALUES($1, $2, $3, $4) RETURNING *',
+          values: [emp, date, startTime, endTime],
+      }
+      const res = await client.query(query)
 
-    const query = {
-      text: sqlLine,
-    };
-
-    const res = await client.query(query);
-
-    let money = 0;
-    return Promise.all(
-      res.rows.map(async (line) => {
-        return {
-          id: line.id,
-          name: await employees.getEmployeeName(line.empId),
-          service: await services.getServiceLine(line.id),
-          date: line.date,
-          startTime: line.startTime,
-          endTime: line.endTime,
-        };
-      })
-    );
+      return res.rows[0]
   } catch (err) {
-    console.log(err.stack);
+      console.log(err.stack)
   }
-};
+}
+
+module.exports.getAppointmentsByEmployee = async (id, date) => {
+  try {
+      const query = {
+          text: 'SELECT * from appointment where emp_id = $1 and apt_date= $2',
+          values: [id, date]
+      }
+      const res = await client.query(query)
+
+      return res.rows
+  } catch (err) {
+      console.log(err.stack)
+  }
+}
+>>>>>>> 02d905c8e75b851512e8e3a0c573844adae72fcc
