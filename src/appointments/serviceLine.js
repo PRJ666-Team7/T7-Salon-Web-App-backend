@@ -40,7 +40,7 @@ module.exports.getServiceLine = async (aptId) => {
 
   try {
     sqlLine =
-      `SELECT SERVICE.SRV_ID AS "srvId", SERVICE.SRV_NAME AS "service" FROM SERVICE_LINE INNER JOIN SERVICE ON SERVICE_LINE.SRV_ID = SERVICE.SRV_ID WHERE SERVICE_LINE.APT_ID = ` +
+      `SELECT SERVICE.SRV_ID AS "srvId", SERVICE.SRV_NAME AS "service", SERVICE.SRV_PRICE AS "price" FROM SERVICE_LINE INNER JOIN SERVICE ON SERVICE_LINE.SRV_ID = SERVICE.SRV_ID WHERE SERVICE_LINE.APT_ID = ` +
       appointmentId;
 
     const query = {
