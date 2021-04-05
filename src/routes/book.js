@@ -13,23 +13,29 @@ module.exports = function (app) {
 
     const employeesData = await employees.getEmployee();
     const servicesData = await services.getServices();
+    const appointmentData = await appointments.getAllAppointment();
 
-    console.log("dfj", employeesData, servicesData)
-    res.json({status: "success", employeesData, servicesData });
+    res.json({status: "success", employeesData, servicesData, appointmentData});
   });
 
   app.post("/addApt",
-    body("empId").isLength({ min: 1, max: 5 }),
+    body("aptId").isArray({ min: 1, max: 10 }),
     body("date").isLength({ min: 10, max: 10 }),
     body("time").isLength({ min: 4, max: 8 }),
     body("services").isArray({ min: 1, max: 10 }),
     passport.authenticate('jwt', { session: false }), async (req, res) => {
 
-      const addApt = await appointments.addAppointments(req.body, req.user.usr_id);
-      console.log(req.body.services)
-      const addSrvLine = await req.body.services.map(async s => {
-        await serviceLine.addServiceLine(addApt, s);
-      });
+      console.log(req.body.aptId)
+      const addApt = await req.body.aptId.map(async a => {
+        console.log("id " + a)
+        const val = await appointments.addAppointments(a, req.user.usr_id);
+        const addSrvLine = await req.body.services.map(async s => {
+            await serviceLine.addServiceLine(val, s);
+          });
+      }) 
+      console.log("apt ids")
+      console.log(addApt)
+
 
 
       const transporter = nodemailer.createTransport({
@@ -60,7 +66,7 @@ module.exports = function (app) {
         }
       });
 
-      res.send(addSrvLine);
+      //res.send(addSrvLine);
     });
 };
 
