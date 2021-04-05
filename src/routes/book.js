@@ -15,7 +15,6 @@ module.exports = function (app) {
     const servicesData = await services.getServices();
     const appointmentData = await appointments.getAllAppointment();
 
-    //console.log("dfj", employeesData, servicesData)
     res.json({status: "success", employeesData, servicesData, appointmentData});
   });
 

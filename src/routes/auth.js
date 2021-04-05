@@ -63,6 +63,12 @@ module.exports = function (app) {
         if (!errors.isEmpty()) {
           return res.json({status: "fail"})
         } else {
+          const userData = await authDataService.getUser(req.body.email)
+
+          if (userData != undefined){
+            return res.json({status: "fail", message: "Email is taken"})
+          }
+          
           const hashPassword = await bcrypt.hash(req.body.password, 15)
           const userDataAdd = await authDataService.addUser(req.body.email, req.body.fname, req.body.lname, req.body.phone, hashPassword)
 

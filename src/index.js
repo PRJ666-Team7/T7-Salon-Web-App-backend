@@ -24,6 +24,7 @@ var editApt = require('./routes/editApt')(app);
 var editSrv = require('./routes/editSrv')(app);
 var book = require('./routes/book')(app);
 var admin = require('./routes/admin')(app);
+var employee = require('./routes/employee')(app);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)
