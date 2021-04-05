@@ -152,6 +152,20 @@ module.exports.adminAddAppointment = async (emp, date, startTime, endTime) => {
   }
 }
 
+module.exports.adminDeleteAppointment = async (id, date) => {
+  try {
+      const query = {
+          text: 'Delete from appointment where emp_id = $1 and apt_date = $2 and available = true',
+          values: [id, date]
+      }
+      const res = await client.query(query)
+
+      return res.rows
+  } catch (err) {
+      console.log(err.stack)
+  }
+}
+
 module.exports.getAppointmentsByEmployee = async (id, date) => {
   try {
       const query = {
@@ -179,3 +193,18 @@ module.exports.getEmployeeSchdule = async (id, date) => {
       console.log(err.stack)
   }
 }
+
+module.exports.getEmployeeScheduleUniqueDate = async (id, date) => {
+  try {
+      const query = {
+          text: 'SELECT DISTINCT apt_date from appointment where emp_id = $1 and apt_date >= $2',
+          values: [id, date]
+      }
+      const res = await client.query(query)
+
+      return res.rows
+  } catch (err) {
+      console.log(err.stack)
+  }
+}
+
